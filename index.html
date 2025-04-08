@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Department Sorting Activity</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { display: flex; gap: 20px; }
+    .card-list, .sort-area { width: 45%; border: 1px solid #ccc; padding: 10px; min-height: 300px; }
+    .card { border: 1px solid #333; background: #f9f9f9; padding: 8px; margin: 5px 0; cursor: grab; }
+    .card:hover { background: #eee; }
+    .controls { margin-top: 20px; }
+    .dropzone { border: 2px dashed #ccc; padding: 10px; min-height: 40px; margin: 5px 0; }
+    .dropzone.filled { background: #e6f7ff; }
+    .success-message { display: none; color: green; font-weight: bold; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Department Sorting Activity</h2>
+
+  <label for="department">Select Department:</label>
+  <select id="department">
+    <option value="">--Choose--</option>
+    <option value="MECH">MECH</option>
+    <option value="CBE">CBE</option>
+    <option value="ECE">ECE</option>
+    <option value="CIVE">CIVE</option>
+    <option value="BME">BME</option>
+  </select>
+
+  <div class="container">
+    <div class="card-list" id="cardList">
+      <h3>Available Cards</h3>
+    </div>
+
+    <div class="sort-area">
+      <h3>Arrange Your Steps (1 to 10)</h3>
+      <div id="sortArea"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <form id="submissionForm" action="https://formsubmit.co/ajax/candice.clemens@colostate.edu" method="POST">
+      <input type="hidden" name="_subject" value="Sorting Results Submission">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" id="results" name="results">
+      <button type="submit">Submit</button>
+    </form>
+    <div id="successMessage" class="success-message">Thank you! Your submission has been received.</div>
+  </div>
+
+  <script>
+    const cardTexts = [
+      "Project/Team Assigned by Professor",
+      "Team Meets with GTA",
+      "Team Meets with Advisor/Sponsor",
+      "Team Works Together on Project Work",
+      "Team Presentation/Project Status Check-In",
+      "Team Presents Final Project at E-Days",
+      "Team Determines Project Timeline and Execution Plan",
+      "Team Determines What Purchases Are Needed for Project",
+      "Team Meets with Affinity Club",
+      "Team Meets with Fiscal Officer"
+    ];
+
+    const cardList = document.getElementById('cardList');
+    const sortArea = document.getElementById('sortArea');
+    const form = document.getElementById('submissionForm');
+    const resultsInput = document.getElementById('results');
+    const successMessage = document.getElementById('successMessage');
+
+    // Populate card list
+    cardTexts.forEach((text) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.draggable = true;
+      card.textContent = text;
+      card.dataset.text = text;
+      card.addEventListener('dblclick', () => duplicateCard(text));
+      cardList.appendChild(card);
+    });
+
+    // Create drop zones
+    for (let i = 0; i < 10; i++) {
+      const zone = document.createElement('div');
+      zone.className = 'dropzone';
+      zone.dataset.index = i;
+      zone.addEventListener('dragover', (e) => e.preventDefault());
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const text = e.dataTransfer.getData('text');
+        zone.textContent = text;
+        zone.classList.add('filled');
+        zone.dataset.text = text;
+      });
+      sortArea.appendChild(zone);
+    }
+
+    // Make cards draggable
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text', e.target.dataset.text);
+      });
+    });
+
+    function duplicateCard(text) {
+      const newCard = document.createElement('div');
+      newCard.className = 'card';
+      newCard.draggable = true;
+      newCard.textContent = text;
+      newCard.dataset.text = text;
+      newCard.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text', text);
+      });
+      newCard.addEventListener('dblclick', () => duplicateCard(text));
+      cardList.appendChild(newCard);
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const department = document.getElementById('department').value;
+      const results = [];
+
+      document.querySelectorAll('.dropzone').forEach((zone, i) => {
+        results.push(`Step ${i + 1}: ${zone.dataset.text || 'N/A'}`);
+      });
+
+      resultsInput.value = `Department: ${department}\n` + results.join('\n');
+
+      fetch(form.action, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(new FormData(form))
+      })
+      .then(response => {
+        if (response.ok) {
+          successMessage.style.display = 'block';
+          form.reset();
+        } else {
+          alert("Submission failed. Please try again.");
+        }
+      })
+      .catch(() => alert("An error occurred. Please try again."));
+    });
+  </script>
+</body>
+</html>
