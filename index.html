@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,39 +71,39 @@
     const resultsInput = document.getElementById('results');
     const successMessage = document.getElementById('successMessage');
 
-    // Populate card list
-    cardTexts.forEach((text) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.draggable = true;
-      card.textContent = text;
-      card.dataset.text = text;
-      card.addEventListener('dblclick', () => duplicateCard(text));
-      cardList.appendChild(card);
-    });
-
-    // Create drop zones
-    for (let i = 0; i < 10; i++) {
-      const zone = document.createElement('div');
-      zone.className = 'dropzone';
-      zone.dataset.index = i;
-      zone.addEventListener('dragover', (e) => e.preventDefault());
-      zone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const text = e.dataTransfer.getData('text');
-        zone.textContent = text;
-        zone.classList.add('filled');
-        zone.dataset.text = text;
+    function populateCardList() {
+      cardList.innerHTML = '<h3>Available Cards</h3>';
+      cardTexts.forEach((text) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        card.textContent = text;
+        card.dataset.text = text;
+        card.addEventListener('dblclick', () => duplicateCard(text));
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text', card.dataset.text);
+        });
+        cardList.appendChild(card);
       });
-      sortArea.appendChild(zone);
     }
 
-    // Make cards draggable
-    document.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text', e.target.dataset.text);
-      });
-    });
+    function populateSortArea() {
+      sortArea.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const zone = document.createElement('div');
+        zone.className = 'dropzone';
+        zone.dataset.index = i;
+        zone.addEventListener('dragover', (e) => e.preventDefault());
+        zone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const text = e.dataTransfer.getData('text');
+          zone.textContent = text;
+          zone.classList.add('filled');
+          zone.dataset.text = text;
+        });
+        sortArea.appendChild(zone);
+      }
+    }
 
     function duplicateCard(text) {
       const newCard = document.createElement('div');
@@ -141,12 +140,19 @@
         if (response.ok) {
           successMessage.style.display = 'block';
           form.reset();
+          document.getElementById('department').value = '';
+          populateCardList();
+          populateSortArea();
         } else {
           alert("Submission failed. Please try again.");
         }
       })
       .catch(() => alert("An error occurred. Please try again."));
     });
+
+    // Initial load
+    populateCardList();
+    populateSortArea();
   </script>
 </body>
 </html>
