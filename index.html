@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Senior Design Student Journey</title>
+  <title>Department Sorting Activity</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     .container { display: flex; gap: 20px; }
@@ -14,10 +14,15 @@
     .dropzone { border: 2px dashed #ccc; padding: 10px; min-height: 40px; margin: 5px 0; }
     .dropzone.filled { background: #e6f7ff; }
     .success-message { display: none; color: green; font-weight: bold; margin-top: 10px; }
+    .instructions { margin: 15px 0; font-size: 16px; line-height: 1.4; }
   </style>
 </head>
 <body>
-  <h2>Senior Design Student Journey</h2>
+  <h2>Department Sorting Activity</h2>
+
+  <div class="instructions">
+    Select your department then, in the order of your experience, arrange applicable cards in the Arrange Your Steps spaces to the right. When you've captured your experience, click Submit.
+  </div>
 
   <label for="department">Select Department:</label>
   <select id="department">
@@ -62,7 +67,8 @@
       "Team Determines Project Timeline and Execution Plan",
       "Team Determines What Purchases Are Needed for Project",
       "Team Meets with Affinity Club",
-      "Team Meets with Fiscal Officer"
+      "Team Meets with Fiscal Officer",
+      "Something Else That's Not Here"
     ];
 
     const cardList = document.getElementById('cardList');
@@ -137,20 +143,15 @@
         body: new URLSearchParams(new FormData(form))
       })
       .then(response => {
-if (response.ok) {
-  successMessage.style.display = 'block';
-
-  // Clear the department
-  document.getElementById('department').selectedIndex = 0;
-
-  // Clear card list and sort area
-  cardList.innerHTML = '<h3>Available Cards</h3>';
-  sortArea.innerHTML = '';
-
-  // Repopulate default state
-  populateCardList();
-  populateSortArea();
-}
+        if (response.ok) {
+          successMessage.style.display = 'block';
+          form.reset();
+          document.getElementById('department').value = '';
+          populateCardList();
+          populateSortArea();
+        } else {
+          alert("Submission failed. Please try again.");
+        }
       })
       .catch(() => alert("An error occurred. Please try again."));
     });
