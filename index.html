@@ -137,15 +137,20 @@
         body: new URLSearchParams(new FormData(form))
       })
       .then(response => {
-        if (response.ok) {
-          successMessage.style.display = 'block';
-          form.reset();
-          document.getElementById('department').value = '';
-          populateCardList();
-          populateSortArea();
-        } else {
-          alert("Submission failed. Please try again.");
-        }
+if (response.ok) {
+  successMessage.style.display = 'block';
+
+  // Clear the department
+  document.getElementById('department').selectedIndex = 0;
+
+  // Clear card list and sort area
+  cardList.innerHTML = '<h3>Available Cards</h3>';
+  sortArea.innerHTML = '';
+
+  // Repopulate default state
+  populateCardList();
+  populateSortArea();
+}
       })
       .catch(() => alert("An error occurred. Please try again."));
     });
